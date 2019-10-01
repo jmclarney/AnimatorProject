@@ -1,0 +1,99 @@
+  This ReadMe should serve as an overview of what the purposes are for every class, interface,
+etc.
+
+  This program runs simple 2D animations with shapes. We approached this by separating the model and
+views to differentiate responsibilities. We created 3 views which implement the IView interface.
+The first is the TextualView which runs the animation by outputting a text file describing the
+animation, meaning it describes all of the shapes and motions included in the model. The second
+view is the SVGView which runs the animation by generating a SVG file which displays an animation
+in a web browser window using the properly created SVG file. The last view is the VisualView which
+generating a visual animation in a pop-up window. These views all run on a provided text file that
+can be converted and read to create the animation. To assist with the reading of these text files,
+an AnimationBuilder interface exists to parse those files and convert them into a readable file for
+the model. The AnimationReader class implements this interface to do so.
+
+  In the animatormodel package, there is IAnimatorModel, which is the interface for the
+Animator Model. In the IAnimatorModel interface, there are methods that serve to get the
+description for this animation (getDescription(), which returns a  String), add a specific motion
+to a shape in the model's ArrayList<IShape> (addMotion(IMotion motion, IShape shape), which is a
+void method), remove a motion from a shape's ArrayList<IMotion> (removeMotion(int motionTime,
+IShape shape), which is void), add a shape (addShape(IShape shape), which is void), remove a
+shape (removeShape(IShape shape), which is void), and return the list of all of the shapes in this
+model (getAllShapes(), which returns a List<IShape>). There is also the AnimatorModelImpl class,
+which implements the IAnimatorModel interface and all of the methods in it. A subclass was added to
+serve as a builder for the model and includes various methods to build the model with specifications
+like the bounds of the canvas window and adding motion. The model is to serve as the operator of
+the animations through these methods. That being said, we chose these methods because the main
+functions of the model are to add shapes and remove shapes from the animation and it can also add
+or remove motions from shapes. Getting all shapes will serve to see how many shapes are in the
+animation currently. Lastly, a description of the animation was required and will be useful to
+understand better what the animation will look like and describe that to the user.
+
+  In the motion package, there are IMotion and MotionImpl. IMotion is the interface that represents
+a motion. It has methods to get the start time of the motion (getStartTime(), which returns an int),
+the x-coordinate of the motion (getX(), which returns a double), the y-coordinate of the motion
+(getY(), which returns a double), the width of a motion (getWidth(), which returns a double), the
+height of a motion (getHeight(), which returns a double), and the color (getColor(), which returns
+a color). MotionImpl is an implementation of the IMotion interface, which implements all of its
+getters. The purpose for a Motion is to house all of the information of a single motion a shape or
+future image takes. It stores the vital positional, size, and color information in addition to when
+the motion takes place which are all vital to running the animation and making calculations as to
+where the shape is at any time in between motions. Since this package only holds information
+pertaining to the shapes, it is only necessary at this point to have getters that can access
+that information. Future functionality may be necessary.
+
+  In the shapes package, there is IShape, AShape, MyEllipse, and MyRectangle. IShape is the interface
+that represents a shape and all of the methods offered by the shape. These methods include
+getName(), which returns the unique name of this shape, addMove(IMotion motion), which adds a move
+or throws an IllegalArgumentException if the new Motion is changing more than one thing (the
+x and y coordinates, the width and height, and the color) at a time. There is also calcShapeAt(int
+time) which returns an IMotion representing the shape at that specific tick. This throws an
+IllegalArgumentException if the shape has not appeared yet (i.e., the first tick of its first motion
+is after the given time) or if the given shape does not have any motions. There is also getType(),
+which returns a String representing the type of this shape, which is the name of the shape (oval or
+rectangle). There is also getMoves(), which returns an ArrayList<IMotion> of all of this shape's
+moves. The last method is copy(), which returns a copy of this IShape. AShape implements all of
+these methods except for getType() and copy() because those are unique to each shape. All of the
+other methods are incredibly similar for each shape so they could be abstracted. MyOval and
+MyRectangle both extend AShape but then implement getType() and copy() on their own. Because of our
+design choice making motions in their own interface which houses the shape's information, all we had
+to have a Shape take in is their name, their unique identifier for the animation, and a list of
+their moves. For Shapes it was vital that they be calculated at an time for the animation to run
+so in order to do that we implemented a calcShapeAt method which, given a list of motions and thus
+putting it in the animation, was able to calculate the positional, size and color information of
+the shape at any time. It was also necessary for us to add motions to a shape so a method for that
+was necessary as well. We additionally chose to include a getter for their moves to access the
+shapes information and a copy method to output copies rather than pointers to the client.
+
+  Lastly, we only took one assumptions. Our assumption was that no shape can teleport, meaning that
+a shape could not jump from position to position without any time passing.
+
+  CompositeView is a new view that implements IEditingView, which is an interface that extends IView
+and adds the functionality necessary for editing the animation. IEditingView separates the
+CompositeView from the other views while still allowing for the functionality that the other views
+have. IEditingView inherits methods from IView and also has methods like setListener(ActionListener
+listener) which sets this view's action listener. It also has getTextInputString(), which returns
+the input string in the text field for the controller to parse through. AppendTextArea takes in
+a string and updates the text area to be that given string. This is used for error messages mainly.
+UpdateModel(ViewModel model) updates this view's model to the given ViewModel after it is mutated
+through the controller. GetComboBox() returns this view's combo box, which allows the controller to
+see which element was clicked. This allows the controller to mutate the model accordingly.
+UpdateComboBox(int selectionIndex, int numMotions) updates this combobox by removing the element
+at the given index and the amount after. This is used to remove a shape and all of its motions by
+just removing the shape. ModifyComboBox() removes all the items from this view implementation's
+JComboBox and recreates it. It is used after adding a shape or a motion to the Animation as the
+animation's list of shapes and motions is different than it was previously. CompositeView implements
+all of these methods.
+
+  The IController interface serves as a representation of a controller that is used to edit an
+Animation. It has one method, playAnimation(), which is void and plays the animation using the
+controller's view. ControllerImpl is the implementation of IController. It takes in an IEditingView
+and an IAnimatorModel. It also implements ActionListener as it is the ActionListener for the
+CompositeView. ActionPerformed parses through what is in the TextField of the CompositeView and
+updates the model and then the view accordingly. MockController and MockView both serve only
+testing purposes.
+
+  I made a scrubber which the animation keeps up with and updates the current view based on it.
+I also made a button that deletes everything in the model. This became complex because of concurrency
+issues which I solved using a while loop that deleted everything in the model's list of shapes and
+all of their motions.
