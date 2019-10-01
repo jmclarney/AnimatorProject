@@ -1,3 +1,12 @@
+Background information on project:
+
+This project was the final project from my Object Oriented Design course this summer, 2019. The goal
+of this project was to create a working animator that could run 2D animations based on various
+input files (text and SVG). Additionally, it was designed to allow a user to create new animations
+by adding and removing shapes and their respective motions throughout the duration of the animation.
+
+README from the time of completion (6/25/19):
+  
   This ReadMe should serve as an overview of what the purposes are for every class, interface,
 etc.
 
